@@ -1,0 +1,89 @@
+# Build output
+build/
+sdkconfig
+sdkconfig.old
+sdkconfig.defaults
+
+# Binary files
+*.bin
+*.elf
+*.map
+*.hex
+*.uf2
+
+# Object files
+*.o
+*.obj
+*.a
+*.lib
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.ninja
+.ninja_deps
+.ninja_log
+compile_commands.json
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.cproject
+.settings/
+
+# Devcontainer (optional - keep if team uses same dev environment)
+# .devcontainer/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+
+# Logs
+*.log
+logs/
+
+# Secrets and credentials (IMPORTANT!)
+secrets.h
+credentials.h
+wifi_config.h
+*.pem
+*.key
+.env
+.env.local
+
+# Test output
+test/output/
+coverage/
+*.gcda
+*.gcno
+
+# Documentation generated
+docs/_build/
+doxygen/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.orig
