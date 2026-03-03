@@ -8,6 +8,10 @@ sdkconfig.defaults
 .trae/
 .devcontainer/
 
+# ESP-IDF
+managed_components/
+dependencies.lock
+
 # Binary files
 *.bin
 *.elf
@@ -91,3 +95,6 @@ doxygen/
 *.temp
 *.bak
 *.orig
+
+# PowerShell
+ps_profile.ps1

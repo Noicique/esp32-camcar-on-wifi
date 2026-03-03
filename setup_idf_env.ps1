@@ -1,7 +1,12 @@
-# 激活虚拟环境
-#"L:\Program\Espressif\frameworks\esp-idf-v5.3.1\idf_venv\Scripts\Activate.ps1"
+$idfPath = "L:\Program\Espressif\frameworks\esp-idf-v5.3.1"
 
-# 设置 ESP-IDF 路径
-$env:IDF_PATH = "L:\Program\Espressif\frameworks\esp-idf-v5.3.1"
-
-Write-Host "ESP-IDF environment ready"
+if (Test-Path "$idfPath\export.ps1") {
+    Write-Host "Activating ESP-IDF environment..." -ForegroundColor Green
+    . "$idfPath\export.ps1"
+    Write-Host ""
+    Write-Host "ESP-IDF environment is ready!" -ForegroundColor Cyan
+    Write-Host "You can now run: idf.py build" -ForegroundColor Yellow
+} else {
+    Write-Host "ERROR: ESP-IDF not found at $idfPath" -ForegroundColor Red
+    Write-Host "Please check your ESP-IDF installation." -ForegroundColor Red
+}

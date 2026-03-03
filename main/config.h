@@ -1,0 +1,14 @@
+#pragma once
+#include "driver/gpio.h"
+
+#define PWM_FREQUENCY 1000
+#define PWM_RESOLUTION LEDC_TIMER_8_BIT
+#define PWM_DUTY_CYCLE 200
+
+#define MOTOR_AIN1  GPIO_NUM_42
+#define MOTOR_AIN2  GPIO_NUM_41
+#define MOTOR_BIN1  GPIO_NUM_47
+#define MOTOR_BIN2  GPIO_NUM_21
+#define MOTOR_PWMA  GPIO_NUM_1
+#define MOTOR_PWMB  GPIO_NUM_2
+#define MOTOR_STBY  GPIO_NUM_14
