@@ -2,7 +2,8 @@
 build/
 sdkconfig
 sdkconfig.old
-sdkconfig.defaults
+!sdkconfig.defaults
+
 
 # Project specific
 .trae/

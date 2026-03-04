@@ -1,0 +1,17 @@
+#pragma once
+
+// WiFi 配置 - 复制此文件为 wifi_config.h 并填入你的信息
+#define WIFI_SSID "your_wifi_ssid"
+#define WIFI_PASSWORD "your_wifi_password"
+#define WIFI_AUTHMODE WIFI_AUTH_WPA2_PSK
+
+// 静态IP配置
+#define USE_STATIC_IP 1
+
+#if USE_STATIC_IP
+#define STATIC_IP_ADDR "192.168.x.x"
+#define STATIC_GATEWAY "192.168.x.1"
+#define STATIC_NETMASK "255.255.255.0"
+#define STATIC_DNS_PRIMARY "8.8.8.8"
+#define STATIC_DNS_SECONDARY "8.8.4.4"
+#endif

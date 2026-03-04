@@ -121,7 +121,7 @@
         let isMoving = false;
         
         // 修改这里的IP地址为你的ESP32地址
-        const ESP32_IP = '192.168.2.110'; // 改成你的ESP32 IP
+        const ESP32_IP = '192.168.2.110';
         
         function addLog(message) {
             const log = document.getElementById('messageLog');
@@ -171,8 +171,9 @@
                 }, 3000);
             };
             
-            websocket.onerror = function(error) {
-                addLog('❌ 连接错误');
+            websocket.onerror = function(event) {
+                addLog(`❌ 连接错误: ${event.message || '无法连接到服务器'}`);
+                console.error('WebSocket error:', event);
                 updateStatus(false);
             };
         }
