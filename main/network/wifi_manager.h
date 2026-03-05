@@ -4,8 +4,16 @@
 #include "esp_event.h"
 
 /**
+ * @brief 初始化网络接口和事件循环
+ * @return ESP_OK 成功
+ * @note 必须在wifi_init_sta()之前调用
+ */
+esp_err_t wifi_init_netif(void);
+
+/**
  * @brief 初始化Wi-Fi Station模式
  * @return ESP_OK 成功
+ * @note 需要先调用wifi_init_netif()
  */
 esp_err_t wifi_init_sta(void);
 

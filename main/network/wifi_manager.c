@@ -54,7 +54,7 @@ static esp_err_t configure_static_ip(void)
 }
 #endif
 
-esp_err_t wifi_init_sta(void)
+esp_err_t wifi_init_netif(void)
 {
     esp_err_t ret = esp_netif_init();
     if (ret != ESP_OK) {
@@ -73,6 +73,14 @@ esp_err_t wifi_init_sta(void)
         ESP_LOGE(s_tag, "Create STA netif failed");
         return ESP_FAIL;
     }
+    
+    ESP_LOGI(s_tag, "Netif initialized");
+    return ESP_OK;
+}
+
+esp_err_t wifi_init_sta(void)
+{
+    esp_err_t ret;
     
 #if USE_STATIC_IP
     ret = configure_static_ip();
