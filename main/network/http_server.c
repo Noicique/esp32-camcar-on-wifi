@@ -1,5 +1,5 @@
 #include "http_server.h"
-#include "motor_control/motor_control.h"
+#include "command_handler.h"
 #include "esp_log.h"
 #include "esp_spiffs.h"
 #include <string.h>
@@ -91,24 +91,9 @@ static esp_err_t ws_handler(httpd_req_t *req)
 
     if (ws_pkt.type == HTTPD_WS_TYPE_TEXT) {
         ESP_LOGI(s_tag, "Received command: %s", (char*)buf);
-        
-        if (strcmp((char*)buf, "forward_start") == 0) {
-            motor_forward();
-        } else if (strcmp((char*)buf, "backward_start") == 0) {
-            motor_backward();
-        } else if (strcmp((char*)buf, "left_start") == 0) {
-            motor_turn_left();
-        } else if (strcmp((char*)buf, "right_start") == 0) {
-            motor_turn_right();
-        } else if (strcmp((char*)buf, "stop") == 0) {
-            motor_stop();
-        } else if (strcmp((char*)buf, "rotate_step") == 0) {
-            ESP_LOGI(s_tag, "Rotate step command");
-        } else if (strcmp((char*)buf, "turn_left") == 0) {
-            motor_turn_left();
-        } else if (strcmp((char*)buf, "turn_right") == 0) {
-            motor_turn_right();
-        }
+
+        car_cmd_t cmd = command_parse((char*)buf);
+        command_dispatch(cmd);
         
         char reply[256];
         sprintf(reply, "Executed: %s", (char*)buf);

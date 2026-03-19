@@ -3,15 +3,13 @@
 #include "esp_err.h"
 
 /**
- * @brief 初始化电机GPIO引脚
+ * @brief 初始化电机（GPIO + PWM），作为 hal_motor_ops_t.init 的实现
  * @return ESP_OK 成功
  */
-esp_err_t motor_gpio_init(void);
+esp_err_t motor_init(void);
 
-/**
- * @brief 初始化电机PWM
- * @return ESP_OK 成功
- */
+/* 以下两个函数保留供内部调用，通常不直接使用 */
+esp_err_t motor_gpio_init(void);
 esp_err_t motor_pwm_init(void);
 
 /**

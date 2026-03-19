@@ -6,6 +6,13 @@
 
 static const char *s_tag = "MOTOR";
 
+esp_err_t motor_init(void)
+{
+    esp_err_t ret = motor_gpio_init();
+    if (ret != ESP_OK) return ret;
+    return motor_pwm_init();
+}
+
 esp_err_t motor_gpio_init(void)
 {
     gpio_config_t io_conf = {

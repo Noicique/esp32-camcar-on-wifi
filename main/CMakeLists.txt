@@ -1,7 +1,10 @@
 idf_component_register(
     SRCS "main.c"
+         "hal/hal_motor.c"
+         "hal/hal_camera.c"
          "motor_control/motor_control.c"
          "network/wifi_manager.c"
          "network/http_server.c"
-    INCLUDE_DIRS "." "motor_control" "network"
+         "network/command_handler.c"
+    INCLUDE_DIRS "." "hal" "motor_control" "network"
 )

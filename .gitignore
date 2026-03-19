@@ -8,6 +8,7 @@ sdkconfig.old
 # Project specific
 .trae/
 .devcontainer/
+.claude/
 
 # ESP-IDF
 managed_components/
