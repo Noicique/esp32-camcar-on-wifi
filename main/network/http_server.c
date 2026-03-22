@@ -1,7 +1,9 @@
 #include "http_server.h"
 #include "command_handler.h"
+#include "camera_stream.h"
 #include "esp_log.h"
 #include "esp_spiffs.h"
+#include "esp_heap_caps.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -9,23 +11,39 @@ static const char *s_tag = "HTTP_SERVER";
 
 static esp_err_t root_get_handler(httpd_req_t *req)
 {
-    FILE* f = fopen("/spiffs/index.html", "r");
+    FILE *f = fopen("/spiffs/index.html", "r");
     if (f == NULL) {
         ESP_LOGE(s_tag, "Failed to open index.html");
         httpd_resp_send_404(req);
         return ESP_FAIL;
     }
 
-    char buf[512];
-    size_t read_bytes;
-    httpd_resp_set_type(req, "text/html");
+    fseek(f, 0, SEEK_END);
+    long file_size = ftell(f);
+    rewind(f);
 
-    while ((read_bytes = fread(buf, 1, sizeof(buf), f)) > 0) {
-        httpd_resp_send_chunk(req, buf, read_bytes);
+    /* 整文件读入 PSRAM，单次 httpd_resp_send 发出（带 Content-Length）。
+     * 避免 chunked 分块传输：中途 EAGAIN 会导致 chunk 边界损坏，
+     * 浏览器报 ERR_INVALID_CHUNKED_ENCODING，脚本块被截断。
+     * httpd_resp_send 内部的 httpd_send_all 会自动重试 EAGAIN。 */
+    char *buf = heap_caps_malloc(file_size, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    if (!buf) {
+        buf = malloc(file_size);
     }
-    httpd_resp_send_chunk(req, NULL, 0);
+    if (!buf) {
+        fclose(f);
+        ESP_LOGE(s_tag, "malloc failed for index.html (%ld B)", file_size);
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Out of memory");
+        return ESP_FAIL;
+    }
+
+    size_t read_bytes = fread(buf, 1, file_size, f);
     fclose(f);
-    return ESP_OK;
+
+    httpd_resp_set_type(req, "text/html");
+    esp_err_t ret = httpd_resp_send(req, buf, (ssize_t)read_bytes);
+    heap_caps_free(buf);
+    return ret;
 }
 
 static httpd_uri_t s_root = {
@@ -115,6 +133,28 @@ static const httpd_uri_t s_ws = {
     .is_websocket = true
 };
 
+/* ── /video：视频帧 WebSocket（二进制，服务器→客户端单向推流） ── */
+
+static esp_err_t video_ws_handler(httpd_req_t *req)
+{
+    if (req->method == HTTP_GET) {
+        int fd = httpd_req_to_sockfd(req);
+        ESP_LOGI(s_tag, "Video WebSocket client connected, fd=%d", fd);
+        camera_stream_attach_client(req->handle, fd);
+        return ESP_OK;
+    }
+    /* 视频流单向推送，忽略客户端发来的帧 */
+    return ESP_OK;
+}
+
+static const httpd_uri_t s_video_ws = {
+    .uri          = "/video",
+    .method       = HTTP_GET,
+    .handler      = video_ws_handler,
+    .user_ctx     = NULL,
+    .is_websocket = true,
+};
+
 esp_err_t init_spiffs(void)
 {
     esp_vfs_spiffs_conf_t conf = {
@@ -150,7 +190,9 @@ httpd_handle_t start_webserver(void)
     config.server_port = 8001;
 #endif
     
-    config.lru_purge_enable = true;
+    config.lru_purge_enable    = true;
+    config.stack_size          = 8192; /* 默认 4096 不够用于 WebSocket 帧发送 */
+    config.send_wait_timeout   = 2;    /* 默认 5s 太长；TCP 拥塞时快速失败，避免 HTTPD 任务长期挂起 */
 
     ESP_LOGI(s_tag, "Starting server on port: '%d'", config.server_port);
     
@@ -163,6 +205,7 @@ httpd_handle_t start_webserver(void)
     ESP_LOGI(s_tag, "Registering URI handlers");
     httpd_register_uri_handler(server, &s_root);
     httpd_register_uri_handler(server, &s_ws);
+    httpd_register_uri_handler(server, &s_video_ws);
     
     return server;
 }
@@ -182,6 +225,10 @@ void connect_handler(void* arg, esp_event_base_t event_base,
     ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
 
     ESP_LOGI(s_tag, "Got IP: " IPSTR, IP2STR(&event->ip_info.ip));
+
+    /* 关闭 WiFi 省电模式：省电模式下 station 在 beacon 间隔内睡眠，
+     * TCP ACK 被延迟最多 102ms，导致小文件传输也触发 EAGAIN。 */
+    esp_wifi_set_ps(WIFI_PS_NONE);
 
     if (*server == NULL) {
         *server = start_webserver();

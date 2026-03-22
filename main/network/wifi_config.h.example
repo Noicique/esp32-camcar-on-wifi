@@ -5,6 +5,11 @@
 #define WIFI_PASSWORD "your_wifi_password"
 #define WIFI_AUTHMODE WIFI_AUTH_WPA2_PSK
 
+// BSSID 锁定（多路由器环境下指定连接哪台路由器）
+// 通过 arp -a 找到网关对应的 MAC 地址填入
+#define WIFI_BSSID_LOCK 0
+#define WIFI_BSSID "xx:xx:xx:xx:xx:xx"
+
 // 静态IP配置
 #define USE_STATIC_IP 1
 
